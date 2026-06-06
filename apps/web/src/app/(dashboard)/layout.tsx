@@ -3,14 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  ArrowLeftRight,
   Bell,
+  Calendar,
   FileText,
+  Heart,
   LayoutDashboard,
   LogOut,
   type LucideIcon,
-  NotebookPen,
+  Package,
   Pill,
   Settings,
+  Shield,
   Users,
 } from 'lucide-react';
 
@@ -28,18 +32,22 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface NavItem {
-  title: string;
   href: string;
+  label: string;
   icon: LucideIcon;
 }
 
 const navItems: NavItem[] = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { title: 'Care Log', href: '/care-log', icon: NotebookPen },
-  { title: 'Medications', href: '/medications', icon: Pill },
-  { title: 'Family', href: '/family', icon: Users },
-  { title: 'Documents', href: '/documents', icon: FileText },
-  { title: 'Settings', href: '/settings', icon: Settings },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/care-log', label: 'Care log', icon: Heart },
+  { href: '/medications', label: 'Medications', icon: Pill },
+  { href: '/appointments', label: 'Appointments', icon: Calendar },
+  { href: '/handoffs', label: 'Handoffs', icon: ArrowLeftRight },
+  { href: '/inventory', label: 'Supplies', icon: Package },
+  { href: '/blueprints', label: 'Blueprints', icon: Shield },
+  { href: '/family', label: 'Family', icon: Users },
+  { href: '/documents', label: 'Documents', icon: FileText },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 function getInitials(firstName?: string, lastName?: string): string {
@@ -112,7 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Sidebar (desktop) */}
         <aside className="hidden w-64 shrink-0 border-r md:block">
           <nav className="sticky top-16 flex flex-col gap-1 p-4">
-            {navItems.map(({ title, href, icon: Icon }) => (
+            {navItems.map(({ label, href, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
@@ -124,7 +132,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {title}
+                {label}
               </Link>
             ))}
           </nav>
@@ -134,20 +142,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className="flex-1 px-4 py-6 pb-24 sm:px-6 md:pb-6">{children}</main>
       </div>
 
-      {/* Bottom tab bar (mobile) */}
+      {/* Bottom tab bar (mobile) — horizontally scrollable to fit all links */}
       <nav className="bg-background fixed inset-x-0 bottom-0 z-40 border-t md:hidden">
-        <div className="grid grid-cols-6">
-          {navItems.map(({ title, href, icon: Icon }) => (
+        <div className="flex overflow-x-auto">
+          {navItems.map(({ label, href, icon: Icon }) => (
             <Link
               key={href}
               href={href}
               className={cn(
-                'flex flex-col items-center gap-1 py-2 text-[10px] font-medium transition-colors',
+                'flex min-w-[4.5rem] flex-shrink-0 flex-col items-center gap-1 py-2 text-[10px] font-medium transition-colors',
                 isActive(href) ? 'text-foreground' : 'text-muted-foreground'
               )}
             >
               <Icon className="h-5 w-5" />
-              <span className="truncate">{title}</span>
+              <span className="truncate">{label}</span>
             </Link>
           ))}
         </div>
