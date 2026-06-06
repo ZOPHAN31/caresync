@@ -8,6 +8,11 @@ import careLogsRouter from './careLogs';
 import medicationsRouter from './medications';
 import tasksRouter from './tasks';
 import dashboardRouter from './dashboard';
+import appointmentsRouter from './appointments';
+import inventoryRouter from './inventory';
+import handoffsRouter from './handoffs';
+import blueprintsRouter from './blueprints';
+import documentsRouter from './documents';
 
 const router = Router();
 
@@ -20,12 +25,10 @@ router.use('/care-logs', careLogsRouter);
 router.use('/medications', medicationsRouter);
 router.use('/tasks', tasksRouter);
 router.use('/dashboard', dashboardRouter);
-
-// Coming in Phase 5:
-// router.use('/appointments', appointmentsRouter);
-// router.use('/documents', documentsRouter);
-// router.use('/inventory', inventoryRouter);
-// router.use('/handoffs', handoffsRouter);
-// router.use('/blueprints', blueprintsRouter);
+router.use('/appointments', appointmentsRouter);
+router.use('/inventory', inventoryRouter);
+router.use('/handoffs', handoffsRouter);
+router.use('/blueprints', blueprintsRouter);
+router.use('/documents', documentsRouter);
 
 export default router;
