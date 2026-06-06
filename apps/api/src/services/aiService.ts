@@ -1,10 +1,15 @@
-import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  type GenerativeModel,
+  type GenerationConfig,
+} from '@google/generative-ai';
 import { env } from '../config/env';
 import { ApiError } from '../utils/ApiError';
 
-// gemini-1.5-flash has been retired by Google; gemini-2.0-flash is its direct
-// successor (fast, low-cost, supports JSON response mode). Change here to swap.
-const MODEL = 'gemini-2.0-flash';
+// gemini-1.5-flash has been retired by Google. gemini-2.5-flash is the current
+// fast, low-cost model (supports JSON response mode) and has quota on this
+// project (the 2.0-flash free tier is limit:0 here). Change here to swap.
+const MODEL = 'gemini-2.5-flash';
 
 function getClient(): GoogleGenerativeAI {
   if (!env.GEMINI_API_KEY) {
@@ -39,16 +44,27 @@ async function runGenerate(model: GenerativeModel, userMessage: string): Promise
   }
 }
 
+// gemini-2.5 models "think" by default, spending maxOutputTokens on internal
+// reasoning before the visible answer (which truncates short replies). We
+// disable thinking for fast, complete responses. `thinkingConfig` isn't in the
+// SDK's types yet but is forwarded to the REST API, so we extend the type.
+type GenConfig = GenerationConfig & { thinkingConfig?: { thinkingBudget: number } };
+
+function buildModel(systemInstruction: string, maxTokens: number, json: boolean): GenerativeModel {
+  const generationConfig: GenConfig = {
+    maxOutputTokens: maxTokens,
+    thinkingConfig: { thinkingBudget: 0 },
+    ...(json ? { responseMimeType: 'application/json' } : {}),
+  };
+  return getClient().getGenerativeModel({ model: MODEL, systemInstruction, generationConfig });
+}
+
 async function complete(
   systemPrompt: string,
   userMessage: string,
   maxTokens = 1500
 ): Promise<string> {
-  const model = getClient().getGenerativeModel({
-    model: MODEL,
-    systemInstruction: systemPrompt,
-    generationConfig: { maxOutputTokens: maxTokens },
-  });
+  const model = buildModel(systemPrompt, maxTokens, false);
   const text = await runGenerate(model, userMessage);
   if (!text) throw ApiError.internal('Unexpected AI response type', 'AI_ERROR');
   return text;
@@ -60,11 +76,7 @@ async function completeJSON<T>(
   maxTokens = 1500
 ): Promise<T> {
   const jsonSystemPrompt = `${systemPrompt}\n\nYou must respond with valid JSON only. No markdown, no backticks, no explanation — raw JSON that can be parsed directly with JSON.parse().`;
-  const model = getClient().getGenerativeModel({
-    model: MODEL,
-    systemInstruction: jsonSystemPrompt,
-    generationConfig: { maxOutputTokens: maxTokens, responseMimeType: 'application/json' },
-  });
+  const model = buildModel(jsonSystemPrompt, maxTokens, true);
   const text = await runGenerate(model, userMessage);
   try {
     return JSON.parse(text) as T;
