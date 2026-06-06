@@ -11,11 +11,19 @@ async function bootstrap(): Promise<void> {
   await connectDatabase();
 
   if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) {
-    await storageService.ensureBucketExists();
-    logger.info('Storage bucket ready');
+    try {
+      await storageService.ensureBucketExists();
+      logger.info('Storage bucket ready');
+    } catch (error) {
+      // Storage is optional — a hiccup here must not take the whole API down.
+      logger.warn(
+        `Storage bucket init skipped: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
-  const server = app.listen(env.PORT, () => {
+  // Bind 0.0.0.0 explicitly so fly-proxy can reach the app.
+  const server = app.listen(env.PORT, '0.0.0.0', () => {
     logger.info(`CareSync API running on port ${env.PORT} [${env.NODE_ENV}]`);
   });
 
@@ -33,6 +41,9 @@ async function bootstrap(): Promise<void> {
 }
 
 bootstrap().catch((error) => {
-  logger.error('Failed to start server', { error });
+  logger.error(
+    `Failed to start server: ${error instanceof Error ? error.message : String(error)}`,
+    { stack: error instanceof Error ? error.stack : undefined }
+  );
   process.exit(1);
 });
