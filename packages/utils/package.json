@@ -1,0 +1,30 @@
+{
+  "name": "@caresync/utils",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "@caresync/eslint-config": "workspace:*",
+    "@caresync/tsconfig": "workspace:*",
+    "@types/node": "^20.14.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  }
+}
