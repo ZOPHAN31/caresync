@@ -324,9 +324,24 @@ async function main() {
   });
   console.log('  ✓ Created 3 medications with schedules');
 
+  // Mark one medication as given today so the dashboard shows progress.
+  await prisma.medicationLog.create({
+    data: {
+      medicationId: donepezil.id,
+      administeredBy: caregiver.id,
+      administeredAt: new Date(),
+      scheduled: true,
+      given: true,
+    },
+  });
+  console.log('  ✓ Logged a medication administration for today');
+
   // ─── Sample care logs ─────────────────────────────────────
-  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  // Today-dated entries so the dashboard's "today" widgets are populated.
+  const todayMorning = new Date(Date.now() - 3 * 60 * 60 * 1000);
+  const todayMidday = new Date(Date.now() - 2 * 60 * 60 * 1000);
+  const todayAfternoon = new Date(Date.now() - 1 * 60 * 60 * 1000);
 
   await prisma.careLog.createMany({
     data: [
@@ -334,7 +349,7 @@ async function main() {
         recipientId: recipient.id,
         loggedBy: caregiver.id,
         type: LogEntryType.MEAL,
-        occurredAt: yesterday,
+        occurredAt: todayMorning,
         mealDescription: 'Breakfast — oatmeal with banana',
         mealAmount: 'full',
         notes: 'Good appetite this morning. Ate independently.',
@@ -343,14 +358,14 @@ async function main() {
         recipientId: recipient.id,
         loggedBy: caregiver.id,
         type: LogEntryType.WATER,
-        occurredAt: yesterday,
+        occurredAt: todayMidday,
         waterOz: 8,
       },
       {
         recipientId: recipient.id,
         loggedBy: caregiver.id,
         type: LogEntryType.MOOD,
-        occurredAt: yesterday,
+        occurredAt: todayAfternoon,
         moodRating: 4,
         moodDescription:
           'Good mood in morning. Started getting agitated around 4pm (sundowning). Music helped.',
@@ -438,7 +453,7 @@ async function main() {
       location: 'Memorial Medical Center, Neurology Clinic',
       address: '100 Medical Drive, Suite 400',
       phone: '555-0200',
-      scheduledAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       durationMinutes: 45,
       notes: 'Bring updated medication list and recent care logs.',
       preparationInstructions:
