@@ -1,15 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { AlertCircle } from 'lucide-react';
-import axios from 'axios';
-
+import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -19,134 +18,85 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { loginRequest } from '@/lib/auth';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().min(1, 'Password is required'),
 });
 
-type LoginValues = z.infer<typeof loginSchema>;
+type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [formError, setFormError] = useState<string | null>(null);
+  const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<LoginValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = async (values: LoginValues) => {
-    setFormError(null);
+  const onSubmit = async (data: LoginForm) => {
+    setError(null);
     try {
-      await loginRequest(values);
-      // Session handling & redirect arrive in Phase 3.
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setFormError(err.response?.data?.error?.message ?? 'Unable to sign in. Please try again.');
-      } else {
-        setFormError('Unable to sign in. Please try again.');
-      }
+      await login(data.email, data.password);
+    } catch {
+      setError('Invalid email or password. Please try again.');
     }
   };
 
-  const isSubmitting = form.formState.isSubmitting;
-
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to your CareSync account to continue.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {formError ? (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{formError}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="you@example.com"
-                      autoComplete="email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+    <div className="bg-background flex min-h-screen items-center justify-center px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <div className="mb-4 flex items-center justify-center">
+            <span className="text-primary text-2xl font-bold">CareSync</span>
+          </div>
+          <CardTitle className="text-center text-2xl">Welcome back</CardTitle>
+          <CardDescription className="text-center">
+            Sign in to your CareSync account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="you@example.com" {...register('email')} />
+              {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link href="/forgot-password" className="text-primary text-sm hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+              <Input id="password" type="password" {...register('password')} />
+              {errors.password && (
+                <p className="text-destructive text-sm">{errors.password.message}</p>
               )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <Link
-                      href="/forgot-password"
-                      className="text-muted-foreground hover:text-foreground text-sm font-medium"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Signing in…' : 'Sign in'}
+              {isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-        </Form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card text-muted-foreground px-2">Or</span>
-          </div>
-        </div>
-
-        <Button type="button" variant="outline" className="w-full" disabled>
-          Sign in with Google
-        </Button>
-      </CardContent>
-      <CardFooter className="justify-center">
-        <p className="text-muted-foreground text-sm">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-foreground font-medium hover:underline">
-            Create one
-          </Link>
-        </p>
-      </CardFooter>
-    </Card>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-muted-foreground text-sm">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="text-primary font-medium hover:underline">
+              Create one
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }

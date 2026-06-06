@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -41,10 +42,19 @@ const navItems: NavItem[] = [
   { title: 'Settings', href: '/settings', icon: Settings },
 ];
 
+function getInitials(firstName?: string, lastName?: string): string {
+  const a = firstName?.[0] ?? '';
+  const b = lastName?.[0] ?? '';
+  return (a + b).toUpperCase() || 'CS';
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const fullName = user ? `${user.firstName} ${user.lastName}` : 'CareSync';
+  const initials = getInitials(user?.firstName, user?.lastName);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -62,18 +72,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full" aria-label="Account">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback>CS</AvatarFallback>
+                    <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>My account</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-0.5">
+                    <span className="text-sm font-medium">{fullName}</span>
+                    {user?.email ? (
+                      <span className="text-muted-foreground text-xs font-normal">
+                        {user.email}
+                      </span>
+                    ) : null}
+                  </div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive">
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    void logout();
+                  }}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
