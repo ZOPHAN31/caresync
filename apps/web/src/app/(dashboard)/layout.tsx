@@ -15,6 +15,7 @@ import {
   Pill,
   Settings,
   Shield,
+  Sparkles,
   Users,
 } from 'lucide-react';
 
@@ -39,6 +40,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/ai', label: 'AI assistant', icon: Sparkles },
   { href: '/care-log', label: 'Care log', icon: Heart },
   { href: '/medications', label: 'Medications', icon: Pill },
   { href: '/appointments', label: 'Appointments', icon: Calendar },
