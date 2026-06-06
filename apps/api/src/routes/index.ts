@@ -2,24 +2,30 @@ import { Router } from 'express';
 import healthRouter from './health';
 import authRouter from './auth';
 import inviteRouter from './invites';
+import careTeamsRouter from './careTeams';
+import recipientsRouter from './recipients';
+import careLogsRouter from './careLogs';
+import medicationsRouter from './medications';
+import tasksRouter from './tasks';
+import dashboardRouter from './dashboard';
 
 const router = Router();
 
 router.use('/health', healthRouter);
 router.use('/auth', authRouter);
 router.use('/', inviteRouter);
+router.use('/teams', careTeamsRouter);
+router.use('/', recipientsRouter);
+router.use('/care-logs', careLogsRouter);
+router.use('/medications', medicationsRouter);
+router.use('/tasks', tasksRouter);
+router.use('/dashboard', dashboardRouter);
 
-// Feature routes — mounted in subsequent phases:
-// router.use('/care-teams', careTeamRouter);
-// router.use('/recipients', recipientRouter);
-// router.use('/care-logs', careLogRouter);
-// router.use('/medications', medicationRouter);
-// router.use('/tasks', taskRouter);
-// router.use('/appointments', appointmentRouter);
-// router.use('/documents', documentRouter);
+// Coming in Phase 5:
+// router.use('/appointments', appointmentsRouter);
+// router.use('/documents', documentsRouter);
 // router.use('/inventory', inventoryRouter);
-// router.use('/handoffs', handoffRouter);
-// router.use('/blueprints', blueprintRouter);
-// router.use('/notifications', notificationRouter);
+// router.use('/handoffs', handoffsRouter);
+// router.use('/blueprints', blueprintsRouter);
 
 export default router;
