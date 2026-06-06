@@ -23,6 +23,7 @@ export default defineConfig({
         process.env.NEXTAUTH_SECRET ?? 'test_nextauth_secret_at_least_32_characters_0',
       NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
       ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS ?? 'http://localhost:3000',
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? '',
     },
     coverage: {
       provider: 'v8',

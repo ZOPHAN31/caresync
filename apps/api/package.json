@@ -17,6 +17,7 @@
     "@auth/prisma-adapter": "^2.11.2",
     "@caresync/types": "workspace:*",
     "@caresync/utils": "workspace:*",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^5.16.1",
     "@supabase/supabase-js": "^2.107.0",
     "bcryptjs": "^2.4.3",

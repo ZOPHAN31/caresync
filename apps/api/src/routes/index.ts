@@ -13,6 +13,7 @@ import inventoryRouter from './inventory';
 import handoffsRouter from './handoffs';
 import blueprintsRouter from './blueprints';
 import documentsRouter from './documents';
+import aiRouter from './ai';
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.use('/inventory', inventoryRouter);
 router.use('/handoffs', handoffsRouter);
 router.use('/blueprints', blueprintsRouter);
 router.use('/documents', documentsRouter);
+router.use('/ai', aiRouter);
 
 export default router;
